@@ -130,11 +130,9 @@ export async function* parseCsvtStream<T = Record<string, unknown>>(
 
                 // --- Process Data Lines --- (Row 2 onwards)
                 if (headers) { // Ensure headers are parsed successfully
-                    let rowProcessedSuccessfully = false;
                     if (line.trim() === '') {
                        // Skip empty data lines silently.
                        rowNumber++; // Increment for skipped empty line
-                       rowProcessedSuccessfully = true; // Mark as processed for row number logic
                        continue;
                     }
 
@@ -222,13 +220,11 @@ export async function* parseCsvtStream<T = Record<string, unknown>>(
                          const resultData = rowData as T;
                          yield { data: [resultData], headers: headerYielded ? [] : headers, errors: rowErrors };
                          headerYielded = true;
-                         rowProcessedSuccessfully = true;
                     } else if (rowErrors.length === 0) {
                          // Yield successful data row
                          const resultData = rowData as T;
                          yield { data: [resultData], headers: headerYielded ? [] : headers, errors: [] };
                          headerYielded = true;
-                         rowProcessedSuccessfully = true;
                     }
                     // If collect mode and rowErrors.length > 0 but !hasFatalErrorForRow -> this shouldn't happen with current logic
 
@@ -296,7 +292,6 @@ export function writeCsvtStream<T extends Record<string, any>>(
 
     let headersDefined = false;
     let headersToWrite: ExplicitColumnHeader[] = explicitHeaders || [];
-    let firstChunkProcessed = false;
 
     const transformer = new TransformStream<T, string>({
         async transform(chunk, controller) {
@@ -406,7 +401,7 @@ export function writeCsvtStream<T extends Record<string, any>>(
                 controller.error(err);
             }
         },
-        cancel(reason) {
+        cancel(_reason) {
              // Check if iterator exists and has a return method
              if (iterator && typeof (iterator as any).return === 'function') {
                  try {
