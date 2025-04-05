@@ -1,48 +1,46 @@
-# Project Overview for AI Assistants: CSVT Library
+---
+name: CSVT Library
+language: TypeScript
+stacks:
+  - Node.js
+  - Vitest
+docs:
+  - path: README.md
+    importance: HIGH
+    description: Start here - Overview, Usage, API Docs, Scripts.
+  - path: docs/spec.md
+    importance: High
+    description: Project Specification v0.1.0 (English) - Rules, Types, Constraints.
+  - path: docs/project_structure.md
+    importance: Medium
+    description: Detailed directory structure description.
+configs:
+  - package.json
+  - tsconfig.json
+  - vitest.config.ts
+  - .prettierrc.json
+changelog: CHANGELOG.md
+---
 
-This document provides context for AI assistants helping with the development of this TypeScript CSVT library.
+# AI Context: {{ name }}
 
-**1. Project Goal & Summary:**
+Use the metadata in the YAML Frontmatter above and the instructions below for context on this project.
 
-*   **What:** This is a TypeScript library for handling the CSVT (CSV with Types) format.
-*   **CSVT Format:** Extends standard CSV by adding data type information to the header row (e.g., `columnName:typeName`). See the specification documents for details.
-*   **Core Functionality:**
-    *   `parseCsvt`: Parses a CSVT string into structured JavaScript objects, validating data against specified types.
-    *   `writeCsvt`: Generates a CSVT formatted string from an array of JavaScript objects.
-*   **Purpose:** To reduce ambiguity in CSV data and improve reliability during data processing.
-*   **Current Library Version:** `0.1.1` (Check `package.json` for the latest).
+**Instructions for AI Assistant:**
 
-**2. Technology Stack:**
-
-*   **Language:** TypeScript
-*   **Testing:** Vitest (`vitest.config.ts`, tests in `tests/`)
-*   **Building:** `tsc` (TypeScript Compiler, configured via `tsconfig.json`)
-*   **Package Management:** npm (`package.json`)
-*   **Formatting:** Prettier (`.prettierrc.json`)
-
-**3. Key Files & Documentation (Where to Look):**
-
-*   **`README.md` (HIGHLY IMPORTANT):** Contains the project overview, installation instructions, basic usage examples for `parseCsvt` and `writeCsvt`, API documentation, and development scripts. **Please start here to understand the project.**
-*   **`docs/spec.md` (English) / `docs/spec-ja.md` (Japanese):** Defines the CSVT specification (currently corresponds to v0.1.0). Essential for understanding the format rules, data types, and constraints.
-*   **`src/`:** Contains the TypeScript source code.
-    *   `index.ts`: Main library entry point, exports public API.
-    *   `parserEntry.ts`, `parser.ts`: Logic for parsing.
-    *   `writer.ts`: Logic for writing (serializing).
-    *   `validator.ts`: Data validation logic.
-    *   `types.ts`: Shared type definitions.
-    *   `utils.ts`: Utility functions.
-*   **`tests/`:** Contains unit and integration tests (`*.spec.ts`).
-*   **`examples/`:** Contains usage example scripts (`basic-usage.ts`, `writer-usage.ts`).
-*   **`package.json`:** Defines dependencies, scripts (`build`, `test`, `format`, etc.), and the library version.
-*   **`CHANGELOG.md`:** Records notable changes for each version.
-*   **`tsconfig.json`:** TypeScript compiler options.
-
-**4. Instructions for AI:**
-
-*   Please assist with development tasks, answer questions, and help troubleshoot issues related to this project.
-*   Refer to `README.md` first to grasp the project context.
-*   Consult the specification documents (`docs/spec.md` or `docs/spec-ja.md`) for details on the CSVT format itself.
-*   Use the information in `package.json` and `tsconfig.json` when dealing with dependencies, build processes, or module resolution.
-*   Check `CHANGELOG.md` for historical context.
-
-Thank you for your assistance! 
+1.  **Primary Goal:** Assist with development, answer questions, and troubleshoot issues related to the `{{ name }}` library.
+2.  **Understanding the Project:**
+    *   **Parse the YAML Frontmatter** for key metadata (`name`, `language`, `stacks`, `docs`, `configs`, `changelog`).
+    *   **Consult the `docs` list in YAML:**
+        *   **MUST READ `README.md` first** (marked HIGH importance) for the essential overview, setup, usage, API, and scripts.
+        *   Refer to the specification documents (`spec.md`, `spec-ja.md` - if listed) for detailed format rules. Note specific version info in their `description`.
+        *   Check `project_structure.md` (if listed) for directory layout details.
+3.  **Navigating the Codebase & Environment:**
+    *   Core technologies are listed under `language` and `stacks`.
+    *   Essential configuration files are listed under `configs`. Use these to understand the build, dependencies, testing setup, etc.
+    *   Pay special attention to `package.json` for version, scripts, and dependencies.
+4.  **History & Changes:**
+    *   Check the file specified in `changelog` (if listed) for the history of changes.
+5.  **General:**
+    *   Apply project conventions and maintain code quality.
+    *   Ask clarifying questions if the provided context is insufficient.
