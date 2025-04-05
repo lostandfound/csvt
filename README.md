@@ -118,7 +118,7 @@ const dataToWrite = [
 const csvtString1 = writeCsvt(dataToWrite);
 console.log(csvtString1);
 /* Output (example):
-id:number,name:string,score:number,tags:array,createdAt:datetime
+id:number!,name:string,score:number,tags:array,createdAt:datetime
 1,Alice,95.5,"["A","B"]",2023-10-27T10:00:00.000Z
 2,"Bob, Jr.",,"["C"]",2023-10-27T10:01:00.000Z
 */
@@ -140,6 +140,21 @@ id:number!,name:string,score:number,createdAt:date
 2,"Bob, Jr.",,2023-10-27
 */
 ```
+
+## Future Enhancements
+
+The following features are planned for future releases:
+
+*   **Streaming API:**
+    *   `parseCsvtStream`: Parse large CSVT files without loading the entire file into memory.
+    *   `writeCsvtStream`: Stream data from a source (e.g., database) directly into CSVT format.
+*   **Validation API:**
+    *   `validateData`: Validate existing JavaScript data arrays against CSVT header definitions, independent of parsing.
+*   **Header Utilities:**
+    *   `extractHeaders`: Quickly extract header information (`CsvtHeader[]`) from a CSVT string.
+    *   `inferHeaders`: Infer `CsvtHeaderInput[]` from a JavaScript data array for use with `writeCsvt`.
+*   **Conversion Utilities:**
+    *   `transformCsvToCsvt`: Convert standard CSV strings to CSVT format using provided header definitions.
 
 ## Specification
 
