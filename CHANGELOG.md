@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2025-04-06 <!-- Release date -->
+
+### Added
+
+-   Implemented streaming parser function `parseCsvtStream` to handle large CSVT data efficiently from `ReadableStream`.
+    -   Supports chunk handling and line reconstruction.
+    -   Reuses existing validation and type conversion logic.
+    -   Provides `AsyncIterable<CsvtParsedResult<T>>` interface.
+    -   Supports error modes (`strict`, `collect`, `substituteNull`).
+-   Implemented streaming writer function `writeCsvtStream` to generate CSVT data streams from synchronous (`Iterable`) or asynchronous (`AsyncIterable`) data sources.
+    -   Returns a `ReadableStream` emitting CSVT strings.
+    -   Supports explicit header definition and inference from the first data item.
+    -   Reuses existing serialization and escaping logic.
+-   Added comprehensive unit tests for streaming functions (`parseCsvtStream`, `writeCsvtStream`) in `tests/streaming.spec.ts`.
+-   Added example usage files for streaming API: `examples/streaming-parser-example.ts` and `examples/streaming-writer-example.ts`.
+-   Updated `README.md` with API documentation for `parseCsvtStream` and `writeCsvtStream`.
+
+### Changed
+
+-   Refactored `parseCsvtStream` to consistently yield `CsvtParsedResult<T>`, including errors within the `errors` array instead of yielding `CsvtError` objects directly in non-strict modes.
+-   Updated `validateAndConvert` to return an empty string (`""`) instead of `null` for nullable `string` types when the input is an empty string, aligning behavior across parsing modes. (Discovered during streaming implementation).
+-   Updated `escapeHeaderName` helper to consistently quote header names containing spaces, improving robustness. (Discovered during streaming implementation).
+-   Updated tests in `tests/validator.spec.ts` and `tests/writer.spec.ts` to align with the changes in `validateAndConvert` and `escapeHeaderName`.
+-   Updated `src/index.ts` to export streaming functions.
+
+### Fixed
+
+-   Resolved various type errors and linter issues identified during the implementation and testing of streaming functions and related refactoring.
+
 ## [0.1.1] - 2025-04-05
 
 ### Added

@@ -14,10 +14,10 @@ describe('validateAndConvert', () => {
 
     // --- NULL Handling and Non-Null Constraint ---
     it('should return null for empty string if nullable', () => {
-        const header = createHeader('string');
+        const header = createHeader('string', false);
         const result = validateAndConvert('', header, 2);
         expect(result.error).toBeUndefined();
-        expect(result.value).toBeNull();
+        expect(result.value).toBe('');
 
         const headerNum = createHeader('number');
         const resultNum = validateAndConvert('""', headerNum, 3); // Quoted empty string

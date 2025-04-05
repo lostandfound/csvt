@@ -90,11 +90,12 @@ function determineHeaders(data: object[], explicitHeaders?: ExplicitColumnHeader
     });
 }
 
-// Escapes a header name if necessary (contains delimiter, newline, colon, or quotes)
-function escapeHeaderName(name: string, delimiter: string): string {
+// Escapes a header name if necessary (contains delimiter, newline, colon, space, or quotes)
+export function escapeHeaderName(name: string, delimiter: string): string {
     const needsQuoting = 
         name.includes(delimiter) || 
         name.includes(':') ||         // Check for colon specifically
+        name.includes(' ') ||         // Check for space
         name.includes('"') || 
         name.includes('\n') || 
         name.includes('\r');
@@ -121,7 +122,7 @@ function generateDataRow<T extends object>(row: T, headers: InternalHeader[], de
   }).join(delimiter);
 }
 
-function serializeValue(value: unknown): string {
+export function serializeValue(value: unknown): string {
   if (value === null || value === undefined) {
     return '';
   }

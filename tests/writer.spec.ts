@@ -28,8 +28,8 @@ describe('writeCsvt', () => {
         ];
         const options: WriteOptions = {
             headers: [
-                { name: 'ID', type: 'number!' }, // Renamed and non-null
-                { name: 'User Name', type: 'string' } // Renamed
+                { name: 'ID', type: 'number!' },
+                { name: 'User Name', type: 'string' },
             ]
         };
         // Assuming the writer maps options.headers[i].name to data[row][Object.keys(row)[i]] ?
@@ -39,10 +39,7 @@ describe('writeCsvt', () => {
             { ID: 20, "User Name": 'David' },
         ];
 
-        const expected = 
-`ID:number!,User Name:string
-10,Charlie
-20,David`;
+        const expected = 'ID:number!,"User Name":string\n10,Charlie\n20,David';
         // Need to refine how explicit headers map to data keys. 
         // For now, testing the output string based on explicit headers.
         // We will test key mapping later or adjust implementation.
@@ -50,8 +47,8 @@ describe('writeCsvt', () => {
 
         // Let's test based on the current implementation assumption (key = name)
         const dataKeysMatchName = [
-             { ID: 10, "User Name": 'Charlie' },
-             { ID: 20, "User Name": 'David' },
+             { ID: 10, 'User Name': 'Charlie' },
+             { ID: 20, 'User Name': 'David' },
         ]
          const optionsKeysMatchName: WriteOptions = {
              headers: [
