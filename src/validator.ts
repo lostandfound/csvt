@@ -32,9 +32,10 @@ export function validateAndConvert(rawValue: string, header: CsvtHeader, rowNumb
                     value: rawValue, // Show original value in error
                 },
             };
+        } else {
+            // Null is allowed, return "" for string type, null for others.
+            return { value: header.type === 'string' ? '' : null };
         }
-        // Null is allowed, return null
-        return { value: null };
     }
 
     // 2. Validate/Convert based on type
