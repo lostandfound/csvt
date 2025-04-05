@@ -2,10 +2,10 @@
 import { parseCsvtStream, type CsvtParsedResult, type CsvtError } from '../src/index'; // Adjust path if testing locally before publishing
 import { Readable } from 'stream';
 
-// Helper type guard
-function isParsedResult<T>(obj: any): obj is CsvtParsedResult<T> {
-  return obj && typeof obj === 'object' && Array.isArray(obj.data) && Array.isArray(obj.errors);
-}
+// Remove Helper type guard
+// function isParsedResult<T>(obj: any): obj is CsvtParsedResult<T> {
+//   return obj && typeof obj === 'object' && Array.isArray(obj.data) && Array.isArray(obj.errors);
+// }
 
 async function runStreamingParserExample() {
   console.log('--- Streaming Parser Example ---');
@@ -30,12 +30,10 @@ invalid-row
     const streamIteratorStrict = parseCsvtStream(webReadableStream, { errorMode: 'strict' });
 
     for await (const result of streamIteratorStrict) {
-      // Type guard to ensure result is CsvtParsedResult
-      if (isParsedResult(result)) {
-        console.log('Strict - Data:', result.data);
-        console.log('Strict - Headers:', result.headers); // Headers are included in each result
-        // Errors array will be empty here as strict mode throws on error
-      }
+      // No type guard needed - result is always CsvtParsedResult<T>
+      console.log('Strict - Data:', result.data);
+      console.log('Strict - Headers:', result.headers); // Headers are included in each result
+      // Errors array will be empty here as strict mode throws on error
     }
     console.log('Strict mode finished successfully (or stream was empty).');
 
@@ -59,20 +57,18 @@ invalid-row
   const allErrorsCollected: any[] = [];
 
   for await (const result of streamIteratorCollect) {
-    // Type guard
-    if (isParsedResult(result)) {
-      if (result.headers && !headersCollected) {
-        headersCollected = result.headers;
-        console.log('Collect - Headers:', headersCollected);
-      }
-      if (result.data.length > 0) {
-        // Each result typically contains one row's data
-        allDataCollected.push(...result.data);
-      }
-      if (result.errors.length > 0) {
-        // Errors specific to the processed chunk/row
-        allErrorsCollected.push(...result.errors);
-      }
+    // No type guard needed
+    if (result.headers && result.headers.length > 0 && !headersCollected) {
+      headersCollected = result.headers;
+      console.log('Collect - Headers:', headersCollected);
+    }
+    if (result.data.length > 0) {
+      // Each result typically contains one row's data
+      allDataCollected.push(...result.data);
+    }
+    if (result.errors.length > 0) {
+      // Errors specific to the processed chunk/row
+      allErrorsCollected.push(...result.errors);
     }
   }
 

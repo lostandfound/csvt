@@ -46,15 +46,16 @@ function findUnquotedNewlineIndex(str: string, startIndex = 0): number {
  * @template T The expected type of the data objects in the result.
  * @param {ReadableStream<Uint8Array>} readableStream The input stream containing CSVT data (UTF-8 encoded).
  * @param {CsvtParseOptions} [options] Parsing options, including error handling mode.
- * @returns {AsyncGenerator<CsvtParsedResult<T> | CsvtError>} An async generator yielding either a single data row result
- *          (within CsvtParsedResult.data) or individual CsvtError objects (in 'collect' or 'substituteNull' mode).
+ * @returns {AsyncGenerator<CsvtParsedResult<T>>} An async generator yielding CsvtParsedResult objects.
+ *          Each yielded object represents either a successfully parsed data row (in `data` array, typically one element)
+ *          or errors encountered for a specific row (in `errors` array, with `data` being empty).
  *          The header information is available on the first successfully yielded CsvtParsedResult.
  * @throws {CsvtError} Throws an error immediately in 'strict' mode if encountered.
  */
 export async function* parseCsvtStream<T = Record<string, unknown>>(
     readableStream: ReadableStream<Uint8Array>,
     options?: CsvtParseOptions,
-): AsyncGenerator<CsvtParsedResult<T> | CsvtError> { // Generator yields results or errors
+): AsyncGenerator<CsvtParsedResult<T>> { // Always yield CsvtParsedResult<T>
     const errorMode = options?.errorMode ?? 'strict';
     const reader = readableStream.getReader();
     const decoder = new TextDecoder('utf-8');
@@ -114,8 +115,9 @@ export async function* parseCsvtStream<T = Record<string, unknown>>(
                         if (errorMode === 'strict') {
                             throw headerError; // Throw immediately in strict mode
                         }
-                        // In collect/substitute, yield the error.
-                        yield headerError;
+                        // In collect/substitute, yield the error wrapped in a result object.
+                        // Headers are not available yet. Cannot yield data.
+                        yield { data: [], headers: [], errors: [headerError] };
                         // Cannot continue parsing without valid headers
                         return;
                     } else {
@@ -147,7 +149,9 @@ export async function* parseCsvtStream<T = Record<string, unknown>>(
                             value: line,
                         };
                         if (errorMode === 'strict') throw formatError;
-                        yield formatError;
+                        // Yield error wrapped in result
+                        yield { data: [], headers: headerYielded ? [] : headers, errors: [formatError] };
+                        headerYielded = true; // Mark headers as yielded (even with error)
                         rowNumber++; // Increment before skipping
                         continue;
                     }
@@ -161,7 +165,9 @@ export async function* parseCsvtStream<T = Record<string, unknown>>(
                             value: line,
                         };
                         if (errorMode === 'strict') throw formatError;
-                        yield formatError;
+                        // Yield error wrapped in result
+                        yield { data: [], headers: headerYielded ? [] : headers, errors: [formatError] };
+                        headerYielded = true; // Mark headers as yielded (even with error)
                         rowNumber++; // Increment before skipping
                         continue;
                     }
@@ -206,42 +212,29 @@ export async function* parseCsvtStream<T = Record<string, unknown>>(
                         }
                     }
 
-                    // Yield errors first if any occurred (in non-strict modes)
-                    for (const err of rowErrors) {
-                         // DEBUG: Log error being yielded
-                        // console.log(`[DEBUG] Yielding error:`, JSON.stringify(err));
-                        yield err;
+                    // Yield result (either data or errors)
+                    if (rowErrors.length > 0 && hasFatalErrorForRow) {
+                        // Yield errors because the row is invalid for data yielding
+                         yield { data: [], headers: headerYielded ? [] : headers, errors: rowErrors };
+                         headerYielded = true;
+                    } else if (rowErrors.length > 0 && errorMode === 'substituteNull' && !hasFatalErrorForRow) {
+                         // Yield data (with nulls substituted) AND the non-fatal errors
+                         const resultData = rowData as T;
+                         yield { data: [resultData], headers: headerYielded ? [] : headers, errors: rowErrors };
+                         headerYielded = true;
+                         rowProcessedSuccessfully = true;
+                    } else if (rowErrors.length === 0) {
+                         // Yield successful data row
+                         const resultData = rowData as T;
+                         yield { data: [resultData], headers: headerYielded ? [] : headers, errors: [] };
+                         headerYielded = true;
+                         rowProcessedSuccessfully = true;
                     }
-
-                    // Yield data if the row is considered valid for the current mode
-                    if (!hasFatalErrorForRow) {
-                        const resultData = rowData as T; // Cast to the generic type
-                        // console.log('[DEBUG] Yielding data:', JSON.stringify(resultData), 'for row:', rowNumber); // Temporary debug log REMOVED
-                        if (!headerYielded) {
-                           yield { data: [resultData], headers: headers, errors: [] }; // Include headers only first time
-                           headerYielded = true;
-                        } else {
-                           yield { data: [resultData], headers: [], errors: [] }; // Subsequent yields have no headers
-                        }
-                        rowProcessedSuccessfully = true; // Mark as successfully processed
-                    }
-                    // else: Row skipped due to fatal errors in collect/substituteNull mode
-                    // If skipped due to errors, row number was already incremented or will be handled by yielding errors
+                    // If collect mode and rowErrors.length > 0 but !hasFatalErrorForRow -> this shouldn't happen with current logic
 
                     // --- Revised Increment Logic --- >>
-                    if (rowProcessedSuccessfully) {
-                        // Increment ONLY if data was yielded OR it was an explicitly skipped empty line.
-                        // Errors yielded don't advance the logical 'next row' number for subsequent errors.
-                         // DEBUG: Log row number increment reason
-                        // console.log(`[DEBUG] Incrementing rowNumber (processed): ${rowNumber} -> ${rowNumber + 1}`);
-                        rowNumber++;
-                    } else if (rowErrors.length > 0) {
-                         // If errors were yielded, but no data (hasFatalErrorForRow was true, or collect mode)
-                         // we need to advance the row number so the *next* line gets the correct number.
-                         // DEBUG: Log row number increment reason
-                        // console.log(`[DEBUG] Incrementing rowNumber (errors yielded): ${rowNumber} -> ${rowNumber + 1}`);
-                        rowNumber++;
-                    }
+                    // Increment row number AFTER yielding the result for that line
+                    rowNumber++;
                     // << --- End Revised Logic ---
                 }
                  // else: Headers failed to parse, and we are not in strict mode, loop should have terminated
