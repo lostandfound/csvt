@@ -63,27 +63,43 @@ export function splitCsvLine(line: string, delimiter: string = ','): string[] {
 }
 
 /**
- * Cleans a CSV field value by removing surrounding quotes (if present)
- * and unescaping doubled quotes.
- *
- * @param rawField The raw field string from CSV splitting.
+ * Cleans a CSV field value according to CSVT interpretation rules.
+ * Currently removes surrounding quotes and unescapes double quotes.
+ * Does NOT trim whitespace by default.
+ * @param field The raw field value from splitCsvLine.
  * @returns The cleaned field value.
  */
-export function cleanCsvField(rawField: string): string {
-    // Trim whitespace *outside* quotes first. Standard CSV usually doesn't trim inside quotes.
-    // Let's reconsider trimming - RFC 4180 implies spaces are significant unless quoted.
-    // If not trimming here, the caller (parser/validator) might need to trim based on context.
-    // For now, let's NOT trim here, to reflect raw splitting more accurately.
-    // const trimmedField = rawField.trim();
-    const field = rawField; // No trim initially
+export function cleanCsvField(field: string): string {
+  if (field.length >= 2 && field.startsWith('"') && field.endsWith('"')) {
+    // Remove surrounding quotes and unescape double quotes ""
+    return field.substring(1, field.length - 1).replace(/""/g, '"');
+  }
+  return field;
+}
 
-    if (field.startsWith('"') && field.endsWith('"')) {
-        // Remove surrounding quotes
-        let value = field.slice(1, -1);
-        // Unescape doubled quotes ""
-        value = value.replace(/""/g, '"');
+/**
+ * Escapes a field value for CSV output according to RFC 4180.
+ * Encloses the field in double quotes if it contains the delimiter, double quotes, or newline characters.
+ * Escapes existing double quotes within the field by doubling them.
+ * @param value The value to escape (converted to string).
+ * @param delimiter The delimiter character used in the CSV.
+ * @returns The escaped CSV field string.
+ */
+export function escapeCsvField(value: string, delimiter: string): string {
+    // Check if quoting is necessary
+    const needsQuoting = 
+        value.includes(delimiter) || 
+        value.includes('"') || 
+        value.includes('\n') || 
+        value.includes('\r');
+
+    if (!needsQuoting) {
         return value;
     }
-    // If not properly quoted, return the field as is (including potential spaces).
-    return field;
+
+    // Escape double quotes within the value
+    const escapedValue = value.replace(/"/g, '""');
+
+    // Enclose in double quotes
+    return `"${escapedValue}"`;
 } 

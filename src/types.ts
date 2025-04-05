@@ -57,3 +57,55 @@ export interface CsvtParseOptions {
   errorMode?: 'strict' | 'collect' | 'substituteNull';
   // Add other options as needed, e.g., expected headers, custom type parsers
 }
+
+// --- Writer Types ---
+
+/**
+ * Represents the explicit definition for a single column header during writing.
+ */
+export interface ExplicitColumnHeader {
+  /** The name of the column. */
+  name: string;
+  /** The data type name (e.g., 'string', 'number!', 'date'). */
+  type: string; // Allows 'string!', 'number!', etc. directly
+}
+
+/**
+ * Options for the CSVT writer function (`writeCsvt`).
+ */
+export interface WriteOptions {
+  /**
+   * Defines how the header row is generated.
+   * - If not provided (or undefined), headers are automatically generated based on the keys of the first data object.
+   *   Basic type inference ('string', 'number', 'bool') might be applied. Non-null constraints are not automatically added.
+   * - If an array of `ExplicitColumnHeader` is provided, these definitions are used directly.
+   *   Automatic type inference is skipped.
+   */
+  headers?: ExplicitColumnHeader[];
+
+  /**
+   * Specifies the line break character(s) to use.
+   * @default '\n' (LF)
+   */
+  lineBreak?: '\n' | '\r\n';
+
+  /**
+   * Specifies the delimiter character to use.
+   * @default ',' (Comma)
+   */
+  delimiter?: string; // Typically ',', but allow others
+
+  /**
+   * (Future consideration) Option to specify date/datetime formatting.
+   */
+  // dateFormat?: string;
+  // dateTimeFormat?: string;
+
+  /**
+   * (Future consideration) Option to control JSON stringification behavior.
+   */
+  // jsonStringifyOptions?: { space?: string | number };
+}
+
+// Known basic types for potential inference during writing
+export type CsvtBasicDataType = 'string' | 'number' | 'bool' | 'date' | 'datetime' | 'array' | 'object';

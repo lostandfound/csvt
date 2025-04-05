@@ -88,9 +88,65 @@ console.log('SubstituteNull Mode Errors:', resultSubstitute.errors); // Errors a
 
 See `src/types.ts` for detailed type definitions of `CsvtHeader`, `CsvtError`, `CsvtParseOptions`, and `CsvtParsedResult`.
 
+### `writeCsvt(data: Record<string, any>[], options?: CsvtWriteOptions): string`
+
+Generates a CSVT formatted string from an array of JavaScript objects.
+
+*   **`data`**: An array of objects representing the rows to write. Each object's keys correspond to the column names.
+*   **`options`** (optional):
+    *   **`headers`**: An array of `CsvtHeaderInput` objects (`{ name: string; type: CsvtDataType; isNonNull?: boolean }`) to explicitly define the header order, types, and nullability. If not provided, headers are inferred from the first object in the `data` array (type inference is basic: `string`, `number`, `boolean`, `object`, `array`, `date`, `datetime`). Header names containing delimiters (`,`), quotes (`"`), or colons (`:`) will be automatically quoted.
+    *   **`delimiter`**: The delimiter character to use (default: `,`).
+*   **Returns**: `string` - The generated CSVT string.
+*   **Behavior:**
+    *   Values are converted and formatted according to their inferred or specified type.
+    *   `Date` objects are formatted as ISO strings (only date part for `date`, full ISO string for `datetime`).
+    *   `array` and `object` types are stringified using `JSON.stringify` and then properly escaped according to CSV rules.
+    *   `null` and `undefined` values are represented as empty fields.
+    *   Values containing delimiters, quotes, or newlines are automatically enclosed in double quotes, with internal quotes escaped (`"` becomes `""`).
+
+**Example:**
+
+```typescript
+import { writeCsvt } from 'csvt';
+
+const dataToWrite = [
+  { id: 1, name: 'Alice', score: 95.5, tags: ['A', 'B'], createdAt: new Date() },
+  { id: 2, name: 'Bob, Jr.', score: null, tags: ['C'], createdAt: new Date() }
+];
+
+// Infer headers
+const csvtString1 = writeCsvt(dataToWrite);
+console.log(csvtString1);
+/* Output (example):
+id:number,name:string,score:number,tags:array,createdAt:datetime
+1,Alice,95.5,"["A","B"]",2023-10-27T10:00:00.000Z
+2,"Bob, Jr.",,"["C"]",2023-10-27T10:01:00.000Z
+*/
+
+// Specify headers
+const csvtString2 = writeCsvt(dataToWrite, {
+  headers: [
+    { name: 'id', type: 'number', isNonNull: true },
+    { name: 'name', type: 'string' },
+    { name: 'score', type: 'number' },
+    { name: 'createdAt', type: 'date' } // Only include date part
+    // 'tags' column is omitted
+  ]
+});
+console.log(csvtString2);
+/* Output (example):
+id:number!,name:string,score:number,createdAt:date
+1,Alice,95.5,2023-10-27
+2,"Bob, Jr.",,2023-10-27
+*/
+```
+
 ## Specification
 
-This library aims to conform to the [CSVT Specification (Japanese)](./docs/spec.md).
+This library aims to conform to the CSVT Specification (v0.1.0) defined within this repository:
+
+*   [CSVT Specification (English, v0.1.0)](./docs/spec.md)
+*   [CSVT 仕様 (日本語, v0.1.0)](./docs/spec-ja.md)
 
 ## Development
 
