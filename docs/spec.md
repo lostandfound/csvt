@@ -5,6 +5,8 @@
 
 ## Change Log
 
+- **v.0.1.1-wd-2025-04-05:**
+  - Added recommendation for the `.csvt` file extension in section 2.1.
 - **v0.1.0 (2025-04-05):** Initial version published.
 
 ## Table of Contents
@@ -64,6 +66,7 @@ CSVT aims to enhance the self-descriptiveness of CSV files and improve the clari
 *   **Line Break:** LF (`\n`) or CRLF (`\r\n`) MUST be used.
 *   **First Row:** Defined as the header row, specifying column names and type information (MUST). See [2.2. Header Row Format](#22-header-row-format) for details.
 *   **Second Row Onwards:** Defined as data rows, which MUST follow the order and types defined in the header. See [2.3. Data Rows](#23-data-rows) for details.
+*   **File Extension:** Using the `.csvt` extension for CSVT files is recommended (SHOULD) to distinguish them from standard `.csv` files.
 
 ### 2.2. Header Row Format
 
