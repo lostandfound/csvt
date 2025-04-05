@@ -11,7 +11,7 @@ export { writeCsvt } from './writer.js';
 export type { WriteOptions, ExplicitColumnHeader } from './types.js';
 
 // Export streaming functions
-export { parseCsvtStream } from './streaming.js';
+export { parseCsvtStream, writeCsvtStream } from './streaming.js';
 
 // Potentially export utility functions if needed for advanced use cases
 // export * from './utils.js';

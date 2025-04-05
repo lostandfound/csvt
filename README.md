@@ -141,13 +141,36 @@ id:number!,name:string,score:number,createdAt:date
 */
 ```
 
+### `parseCsvtStream<T = Record<string, unknown>>(readableStream: ReadableStream, options?: CsvtParseOptions): AsyncIterable<CsvtParsedResult<T>>`
+
+Parses a CSVT data stream efficiently, processing data chunk by chunk.
+
+*   **`readableStream`**: A `ReadableStream` providing the CSVT data (e.g., from `fs.createReadStream` piped through `Readable.toWeb`).
+*   **`options`** (optional): Same options as `parseCsvt`, including `errorMode` (`strict`, `collect`, `substituteNull`).
+*   **Returns**: `AsyncIterable<CsvtParsedResult<T>>`
+    *   Yields `CsvtParsedResult<T>` objects as data rows are parsed. Each yielded object contains:
+        *   `data: T[]`: An array containing a **single** parsed data row (or potentially more if internal buffering occurs, though typically one).
+        *   `headers: CsvtHeader[]`: The parsed header information (consistent across all yielded results after the header is parsed).
+        *   `errors: CsvtError[]`: Any errors encountered *for that specific yielded row* (in `collect` or `substituteNull` mode).
+    *   In `strict` mode, the iterable will throw an error on the first issue.
+    *   The iterable completes when the stream ends.
+
+### `writeCsvtStream(data: AsyncIterable<Record<string, any>> | Iterable<Record<string, any>>, options?: CsvtWriteOptions): ReadableStream`
+
+Generates a CSVT formatted data stream from an iterable (synchronous or asynchronous) source of JavaScript objects.
+
+*   **`data`**: An `Iterable` or `AsyncIterable` providing the objects to write as rows.
+*   **`options`** (optional): Same options as `writeCsvt`, including `headers` (for explicit definition) and `delimiter`.
+*   **Returns**: `ReadableStream` - A stream that emits the generated CSVT data as strings (header row first, then data rows).
+*   **Behavior:**
+    *   Similar to `writeCsvt`, headers are written first (either explicitly defined or inferred from the first item in `data`).
+    *   Each object from the `data` iterable is formatted into a CSVT row string and pushed to the output stream.
+    *   Value conversion, formatting, and escaping rules are the same as `writeCsvt`.
+
 ## Future Enhancements
 
 The following features are planned for future releases:
 
-*   **Streaming API:**
-    *   `parseCsvtStream`: Parse large CSVT files without loading the entire file into memory.
-    *   `writeCsvtStream`: Stream data from a source (e.g., database) directly into CSVT format.
 *   **Validation API:**
     *   `validateData`: Validate existing JavaScript data arrays against CSVT header definitions, independent of parsing.
 *   **Header Utilities:**
