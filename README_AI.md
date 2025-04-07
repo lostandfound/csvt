@@ -25,7 +25,7 @@ configs:
 
 Use the metadata in the YAML Frontmatter above and the instructions below for context on this project.
 
-**Instructions for AI Assistant:**
+## General Instructions
 
 1.  **Primary Goal:** Assist with development, answer questions, and troubleshoot issues related to this library.
 2.  **Initial Understanding (Build Context):**
@@ -42,3 +42,4 @@ Use the metadata in the YAML Frontmatter above and the instructions below for co
 4.  **General:**
     *   Apply project conventions and maintain code quality.
     *   Ask clarifying questions if the provided context is insufficient or ambiguous after reviewing the initial documents.
+
